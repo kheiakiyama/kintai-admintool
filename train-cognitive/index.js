@@ -1,12 +1,11 @@
 const KintaiMembers = require("../kintai-members");
+const SlackParser = require("../slack-parser");
 
 // You must include a context, but other arguments are optional
 module.exports = (context, data) => {
   context.log('train-cognitive called');
   if (data.body) {
-    const body = decodeURIComponent(data.body);
-    const payload = JSON.parse(body.replace(/payload=/g, ""));
-    context.log(payload);
+    const payload = new SlackParser(data.body).parse().payload;
     const members = new KintaiMembers();
     const selected = members.search(payload.actions[0].selected_options[0].value);
     context.res = {
