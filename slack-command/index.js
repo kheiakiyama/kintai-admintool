@@ -20,7 +20,7 @@ module.exports = (context, data) => {
                   "name": "members_list",
                   "text": "Pick a name...",
                   "type": "select",
-                  "options": members.get_all()
+                  "options": members.get_options()
                 }
             ]
         }

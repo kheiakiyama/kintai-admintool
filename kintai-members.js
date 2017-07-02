@@ -16,8 +16,13 @@ class KintaiMembers {
       }
     ];
   }
-  get_all() {
-    return this.members;
+  get_options() {
+    return this.members.map((member) => {
+      return { 
+        text: member.name,
+        value: member.id
+      };
+    });
   }
   search(id) {
     return this.members.find((element) => { return id === element.id });
