@@ -4,12 +4,11 @@ const KintaiMembers = require("../kintai-members");
 module.exports = (context, data) => {
   context.log('train-cognitive called');
   if (data.body) {
-    const body = decodeURI(data.body);
-    context.log(body);
-    const payload = JSON.parse(body);
+    const body = decodeURIComponent(data.body);
+    const payload = JSON.parse(body.replace(/payload=/g, ""));
     context.log(payload);
     const members = new KintaiMembers();
-    const selected = members.search(payload.actions.selected_options.id);
+    const selected = members.search(payload.actions[0].selected_options[0].value);
     context.res = {
         "text": "Who is him/her?",
         "response_type": "in_channel",
