@@ -1,6 +1,7 @@
 // You must include a context, but other arguments are optional
 module.exports = (context, data) => {
   context.log('This function called');
+  context.log(data);
   context.res = {
     "text": "Would you like to play a game?",
     "response_type": "in_channel",
