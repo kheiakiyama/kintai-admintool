@@ -1,5 +1,5 @@
 {
-  "name": "kintai-admintool",
+  "name": "train-cognitive",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,10 +10,5 @@
     "type": "git",
     "url": "git+https://github.com/kheiakiyama/kintai-admintool.git"
   },
-  "author": "kheiakiyama",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/kheiakiyama/kintai-admintool/issues"
-  },
-  "homepage": "https://github.com/kheiakiyama/kintai-admintool#readme"
+  "author": "kheiakiyama"
 }
