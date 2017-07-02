@@ -1,0 +1,19 @@
+{
+  "name": "kintai-admintool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kheiakiyama/kintai-admintool.git"
+  },
+  "author": "kheiakiyama",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kheiakiyama/kintai-admintool/issues"
+  },
+  "homepage": "https://github.com/kheiakiyama/kintai-admintool#readme"
+}
