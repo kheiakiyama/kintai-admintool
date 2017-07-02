@@ -5,7 +5,7 @@ const SlackParser = require("../slack-parser");
 module.exports = (context, data) => {
   context.log('train-cognitive called');
   if (data.body) {
-    const payload = new SlackParser(data.body).parse().payload;
+    const payload = JSON.parse(new SlackParser(data.body).parse().payload);
     const members = new KintaiMembers();
     const selected = members.search(payload.actions[0].selected_options[0].value);
     context.res = {
