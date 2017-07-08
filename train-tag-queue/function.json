@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "type": "queueTrigger",
+      "queueName": "tag",
+      "connection": "KINTAI_STORAGE_CONNECTION",
+      "direction": "in",
+      "name": "item"
+    }
+  ],
+  "disabled": false
+}
