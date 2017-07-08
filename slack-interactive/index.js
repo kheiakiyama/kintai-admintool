@@ -10,7 +10,8 @@ module.exports = (context, data) => {
   context.log('slack-interactive called');
   if (data.body) {
     context.log(data.body);
-    const payload = JSON.parse(new SlackParser(data.body).parse().payload);
+    const payloadText = new SlackParser(data.body).parse().payload;
+    const payload = JSON.parse(payloadText);
     if (payload.callback_id === 'member_selection') {
         const members = new KintaiMembers();
         const selected = members.search(payload.actions[0].selected_options[0].value);
