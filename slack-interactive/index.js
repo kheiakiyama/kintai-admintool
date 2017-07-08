@@ -1,5 +1,8 @@
 const KintaiMembers = require("../kintai-members");
 const SlackParser = require("../slack-parser");
+const url = require("url");
+const path = require("path");
+const TrainQueue = require("../train-queue");
 
 // You must include a context, but other arguments are optional
 module.exports = (context, data) => {
@@ -9,17 +12,14 @@ module.exports = (context, data) => {
     if (payload.callback_id === 'member_selection') {
         const members = new KintaiMembers();
         const selected = members.search(payload.actions[0].selected_options[0].value);
-        context.res = {
-            "text": "Who is him/her?",
-            "response_type": "in_channel",
-            "attachments": [
-                {
-                    "text": selected.name + " choosed.",
-                    "fallback": "If you could read this message, you'd be choosing something fun to do right now.",
-                    "color": "#3AA3E3",
-                    "callback_id": "member_selection"
-                }
-            ]
+        if (selected) {
+            const blobImageUrl = payload.original_message.attachments[0].image_url;
+            const parsed = url.parse(blobImageUrl);
+            const queue = new TrainQueue(process.env.AZURE_STORAGE_CONTAINER);
+            queue.remove(path.basename(parsed.pathname));
+            var message = payload.original_message;
+            message.attachments[0].text = selected.name + " choosed.";
+            context.res = message;
         }
     }
     context.done();
