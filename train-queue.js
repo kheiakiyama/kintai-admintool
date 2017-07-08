@@ -15,8 +15,8 @@ class TrainQueue {
     this._getLast(objectFunc, false);
   }
 
-  remove(object) {
-    this.blobSvc.deleteBlob(this.container, object.name, (error, response) => {
+  remove(name) {
+    this.blobSvc.deleteBlob(this.container, name, (error, response) => {
       if (error) {
         console.log(error);
         return;
