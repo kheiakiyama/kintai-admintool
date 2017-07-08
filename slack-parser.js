@@ -12,16 +12,25 @@ class SlackParser {
   }
 
   _restoreImageUrl(query) {
-    const re = /"dmy":""/;
-    const matches = re.exec(query.payload);
-    return { payload: query.payload.replace(re, this.imageUrl)};
+    if (this.imageUrl) {
+      const re = /"dmy":""/;
+      const matches = re.exec(query.payload);
+      return { payload: query.payload.replace(re, this.imageUrl)};
+    } else {
+      return query;
+    }
   }
 
   _replaceImageUrl(body) {
     const re = /"image_url":"(https)[^,]*"/;
     const matches = re.exec(body);
-    this.imageUrl = matches[0];
-    return body.replace(re, '"dmy":""');
+    if (matches) {
+      this.imageUrl = matches[0];
+      return body.replace(re, '"dmy":""');
+    } else {
+      this.imageUrl = false;
+      return body;
+    }
   }
 }
 
