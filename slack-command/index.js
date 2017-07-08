@@ -15,8 +15,6 @@ module.exports = (context, data) => {
         queue.peek((object) => {
             const helper = new AzureHelper(azure);
             const token = helper.generateSasToken(process.env.KINTAI_STORAGE_CONTAINER, object.name, 'r');
-            context.log(object);
-            context.log(token.uri);
             context.res = {
                 "text": "Who is him/her?",
                 "response_type": "in_channel",
