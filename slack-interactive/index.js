@@ -16,7 +16,7 @@ module.exports = (context, data) => {
         if (selected) {
             const blobImageUrl = payload.original_message.attachments[0].image_url;
             const parsed = url.parse(blobImageUrl);
-            const queue = new TrainQueue(azure, process.env.AZURE_STORAGE_CONTAINER);
+            const queue = new TrainQueue(azure, process.env.KINTAI_STORAGE_CONTAINER);
             queue.remove(path.basename(parsed.pathname));
             var message = payload.original_message;
             message.attachments[0].text = selected.name + " choosed.";

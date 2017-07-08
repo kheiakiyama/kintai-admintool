@@ -11,10 +11,10 @@ module.exports = (context, data) => {
     const subcommand = new SlackParser(data.body).parse().text;
     if (subcommand === 'train') {
         const members = new KintaiMembers();
-        const queue = new TrainQueue(azure, process.env.AZURE_STORAGE_CONTAINER);
+        const queue = new TrainQueue(azure, process.env.KINTAI_STORAGE_CONTAINER);
         queue.peek((object) => {
             const helper = new AzureHelper(azure);
-            const token = helper.generateSasToken(process.env.AZURE_STORAGE_CONTAINER, object.name, 'r');
+            const token = helper.generateSasToken(process.env.KINTAI_STORAGE_CONTAINER, object.name, 'r');
             context.log(object);
             context.log(token.uri);
             context.res = {

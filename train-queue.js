@@ -1,7 +1,7 @@
 class TrainQueue {
 
   constructor(azure, container) {
-    this.blobSvc = azure.createBlobService();
+    this.blobSvc = azure.createBlobService(process.env.KINTAI_STORAGE_CONNECTION);
     this.container = container;
   }
 
