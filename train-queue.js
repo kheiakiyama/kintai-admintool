@@ -36,7 +36,6 @@ class TrainQueue {
           console.log(error);
           return;
         }
-        console.log(result.entries.length);
         if (result.entries.length > 0) {
           objectFunc(result.entries[0]);
           if (remove) {
