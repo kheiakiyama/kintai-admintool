@@ -41,8 +41,12 @@ module.exports = (context, data) => {
                     }
                 ]
             }
+            context.done();
         });
+    } else {
+        context.done();
     }
+  } else {
+      context.done();
   }
-  context.done();
 };
