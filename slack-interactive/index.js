@@ -7,7 +7,6 @@ const azure = require('azure-storage');
 module.exports = (context, data) => {
   context.log('slack-interactive called');
   if (data.body) {
-    context.log(data.body);
     const payload = JSON.parse(new SlackParser(data.body).parse().payload);
     if (payload.callback_id === 'member_selection') {
         const members = new KintaiMembers();
