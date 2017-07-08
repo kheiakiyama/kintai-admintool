@@ -2,6 +2,7 @@ const KintaiMembers = require("../kintai-members");
 const SlackParser = require("../slack-parser");
 const TrainQueue = require("../train-queue");
 const AzureHelper = require('../azure-helper');
+const azure = require('azure-storage');
 
 // You must include a context, but other arguments are optional
 module.exports = (context, data) => {
@@ -11,9 +12,10 @@ module.exports = (context, data) => {
     const subcommand = new SlackParser(data.body).parse().text;
     if (subcommand === 'train') {
         const members = new KintaiMembers();
-        const queue = new TrainQueue(process.env.AZURE_STORAGE_CONTAINER);
+        const queue = new TrainQueue(azure, process.env.AZURE_STORAGE_CONTAINER);
         queue.peek((object) => {
             context.log(object);
+            const helper = new AzureHelper(azure);
             const token = helper.generateSasToken(process.env.AZURE_STORAGE_CONTAINER, object.name, 'r');
             context.log(token.uri);
             context.res = {

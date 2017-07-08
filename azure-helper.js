@@ -1,8 +1,7 @@
-var azure = require('./slack-command/node_modules/azure-storage');
-
 class AzureHelper {
 
-  constructor() {
+  constructor(azure) {
+      this.azure = azure;
   }
 
   // The following values can be used for permissions: 
@@ -10,7 +9,7 @@ class AzureHelper {
   // Concatenate multiple permissions, such as "rwa" = Read, Write, Add
   generateSasToken(container, blobName, permissions) {
     var connString = process.env.AzureWebJobsStorage;
-    var blobService = azure.createBlobService(connString);
+    var blobService = this.azure.createBlobService(connString);
 
     // Create a SAS token that expires in an hour
     // Set start time to five minutes ago to avoid clock skew.
@@ -19,7 +18,7 @@ class AzureHelper {
     var expiryDate = new Date(startDate);
     expiryDate.setMinutes(startDate.getMinutes() + 60);
 
-    permissions = permissions || azure.BlobUtilities.SharedAccessPermissions.READ;
+    permissions = permissions || this.azure.BlobUtilities.SharedAccessPermissions.READ;
 
     var sharedAccessPolicy = {
         AccessPolicy: {

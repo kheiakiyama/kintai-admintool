@@ -1,9 +1,6 @@
-var azureHelper = require('./azure-helper');
-var azure = require('./slack-command/node_modules/azure-storage');
-
 class TrainQueue {
 
-  constructor(container) {
+  constructor(azure, container) {
     this.blobSvc = azure.createBlobService();
     this.container = container;
   }
