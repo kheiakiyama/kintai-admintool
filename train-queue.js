@@ -10,7 +10,7 @@ class TrainQueue {
   }
 
   //Queue の先頭にあるオブジェクトを削除せずに返します。
-  peek(objectFunc) {
+  peek(objectFunc, notFoundFunc) {
     this.blobSvc.listBlobsSegmented(this.container, null, (error, result, response) => {
       if (error) {
         console.log(error);
@@ -18,6 +18,8 @@ class TrainQueue {
       }
       if (result.entries.length > 0) {
         objectFunc(result.entries[0]);
+      } else {
+        notFoundFunc();
       }
     });
   }

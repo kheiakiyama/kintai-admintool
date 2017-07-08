@@ -39,6 +39,12 @@ module.exports = (context, data) => {
                 ]
             }
             context.done();
+        }, () => {
+            context.res = {
+                "text": "Not found image",
+                "response_type": "in_channel"
+            };
+            context.done();
         });
     } else {
         context.done();
