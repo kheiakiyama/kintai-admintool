@@ -20,6 +20,7 @@ module.exports = (context, data) => {
                     var message = payload.original_message;
                     context.log(message);
                     message.attachments[0].text = selected.name + " choosed.";
+                    message.attachments[0].actions = '';
                     context.res = message;
                     context.done();
                 }
