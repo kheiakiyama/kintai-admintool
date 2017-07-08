@@ -7,16 +7,15 @@ const azure = require('azure-storage');
 // You must include a context, but other arguments are optional
 module.exports = (context, data) => {
   context.log('slack-command called');
-  context.log(data);
   if (data.body) {
     const subcommand = new SlackParser(data.body).parse().text;
     if (subcommand === 'train') {
         const members = new KintaiMembers();
         const queue = new TrainQueue(azure, process.env.AZURE_STORAGE_CONTAINER);
         queue.peek((object) => {
-            context.log(object);
             const helper = new AzureHelper(azure);
             const token = helper.generateSasToken(process.env.AZURE_STORAGE_CONTAINER, object.name, 'r');
+            context.log(object);
             context.log(token.uri);
             context.res = {
                 "text": "Who is him/her?",
