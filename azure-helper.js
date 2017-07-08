@@ -8,8 +8,7 @@ class AzureHelper {
   // "a" (Add), "r" (Read), "w" (Write), "d" (Delete), "l" (List)
   // Concatenate multiple permissions, such as "rwa" = Read, Write, Add
   generateSasToken(container, blobName, permissions) {
-    var connString = process.env.AzureWebJobsStorage;
-    var blobService = this.azure.createBlobService(connString);
+    var blobService = this.azure.createBlobService();
 
     // Create a SAS token that expires in an hour
     // Set start time to five minutes ago to avoid clock skew.
