@@ -5,9 +5,18 @@ class SlackParser {
     this.body = body;
   }
 
-  parse() {
+  parse(output) {
     const body = decodeURIComponent(this.body);
+    if (output) {
+      output(body);
+    }
     const replace = this._replaceImageUrl(body);
+    if (output) {
+      output(replace);
+    }
+    if (output) {
+      output(querystring.parse(replace));
+    }
     return this._restoreImageUrl(querystring.parse(replace));
   }
 
