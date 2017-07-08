@@ -5,7 +5,7 @@
       "queueName": "tag",
       "connection": "KINTAI_STORAGE_CONNECTION",
       "direction": "in",
-      "name": "item"
+      "name": "myQueueItem"
     }
   ],
   "disabled": false
