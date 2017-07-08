@@ -18,6 +18,7 @@ module.exports = (context, data) => {
                 selected.id,
                 () => {
                     var message = payload.original_message;
+                    context.log(message);
                     message.attachments[0].text = selected.name + " choosed.";
                     context.res = message;
                     context.done();
