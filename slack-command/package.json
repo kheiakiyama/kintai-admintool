@@ -10,5 +10,8 @@
     "type": "git",
     "url": "git+https://github.com/kheiakiyama/kintai-admintool.git"
   },
-  "author": "kheiakiyama"
+  "author": "kheiakiyama",
+  "dependencies": {
+    "azure-storage": "^2.2.1"
+  }
 }

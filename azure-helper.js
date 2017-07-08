@@ -1,4 +1,4 @@
-var azure = require('azure-storage');
+var azure = require('./slack-command/node_modules/azure-storage');
 
 class AzureHelper {
 
