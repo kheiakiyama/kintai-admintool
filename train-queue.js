@@ -1,5 +1,6 @@
 const url = require("url");
 const path = require("path");
+const MAX_IMAGE_PER_TAG = 20;
 
 class TrainQueue {
 
@@ -50,6 +51,9 @@ class TrainQueue {
 
   setTag(message) {
     this._getTagsCustomVision(() => {
+      if (this._isTagImageOver(message.tag)) {
+        return;
+      }
       this._trainCustomVision(message, () => {
         const parsed = url.parse(message.imageUrl);
         this.remove(path.basename(parsed.pathname));
@@ -88,6 +92,11 @@ class TrainQueue {
   _getTagId(tagName) {
     const tag = this.tags.find((element) => { return tagName === element.Name });
     return tag ? tag.Id : '';
+  }
+
+  _isTagImageOver(tagName) {
+    const tag = this.tags.find((element) => { return tagName === element.Name });
+    return tag ? tag.ImageCount >= MAX_IMAGE_PER_TAG : false;
   }
 
   _trainCustomVision(message, endFunc) {
