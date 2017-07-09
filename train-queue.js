@@ -35,10 +35,10 @@ class TrainQueue {
   }
 
   setTagQueue(imageUrl, tag, success) {
-    const message = JSON.stringify({
+    const message = new Buffer(JSON.stringify({
       imageUrl: imageUrl,
       tag: tag
-    });
+    })).toString('base64');
     this.queueSvc.createMessage('tag', message, (error, result, response) => {
       if(!error){
         success(result);
@@ -46,8 +46,8 @@ class TrainQueue {
     });
   }
 
-  setTag(json) {
-    const message = JSON.parse(json);
+  setTag(messageText) {
+    const message = JSON.parse(new Buffer(messageText, 'base64').toString('utf8'));
     //TODO: send to custom vision
     const parsed = url.parse(message.imageUrl);
     this.remove(path.basename(parsed.pathname));
