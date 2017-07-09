@@ -137,7 +137,9 @@ class TrainQueue {
       }
       console.log(body);
       if (endFunc) {
-        endFunc();
+        var tag, max = 0;
+        body.Predictions.forEach((element) => { if (element.Probability > max) { max = element.Probability; tag = element.Tag; } });
+        endFunc(tag);
       }
     });
   }
