@@ -46,8 +46,7 @@ class TrainQueue {
     });
   }
 
-  setTag(messageText) {
-    const message = JSON.parse(messageText);
+  setTag(message) {
     //TODO: send to custom vision
     const parsed = url.parse(message.imageUrl);
     this.remove(path.basename(parsed.pathname));
