@@ -47,7 +47,7 @@ class TrainQueue {
   }
 
   setTag(messageText) {
-    const message = JSON.parse(new Buffer(messageText, 'base64').toString('utf8'));
+    const message = JSON.parse(messageText);
     //TODO: send to custom vision
     const parsed = url.parse(message.imageUrl);
     this.remove(path.basename(parsed.pathname));
