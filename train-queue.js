@@ -3,10 +3,12 @@ const path = require("path");
 
 class TrainQueue {
 
-  constructor(azure, container) {
+  constructor(request, azure, container) {
+    this.request = request;
     this.blobSvc = azure.createBlobService(process.env.KINTAI_STORAGE_CONNECTION);
     this.queueSvc = azure.createQueueService(process.env.KINTAI_STORAGE_CONNECTION);
     this.container = container;
+    this.tags = [];
   }
 
   //Queue の先頭にあるオブジェクトを削除せずに返します。
@@ -47,9 +49,74 @@ class TrainQueue {
   }
 
   setTag(message) {
-    //TODO: send to custom vision
-    const parsed = url.parse(message.imageUrl);
-    this.remove(path.basename(parsed.pathname));
+    this._getTagsCustomVision(() => {
+      this._trainCustomVision(message, () => {
+        const parsed = url.parse(message.imageUrl);
+        this.remove(path.basename(parsed.pathname));
+      });
+    });
+  }
+
+  _getTagsCustomVision(endFunc) {
+    //ヘッダーを定義
+    const headers = {
+      'Content-Type': 'application/json',
+      'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
+    }
+
+    //オプションを定義
+    const options = {
+      url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/tags',
+      method: 'GET',
+      headers: headers,
+      json: true
+    }
+
+    //リクエスト送信
+    this.request(options, (error, response, body) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      this.tags = body.Tags;
+      if (endFunc) {
+        endFunc();
+      }
+    });
+  }
+
+  _getTagId(tagName) {
+    const tag = this.tags.find((element) => { return tagName === element.Name });
+    return tag ? tag.Id : '';
+  }
+
+  _trainCustomVision(message, endFunc) {
+    //ヘッダーを定義
+    const headers = {
+      'Content-Type': 'application/json',
+      'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
+    }
+
+    //オプションを定義
+    const options = {
+      url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
+      method: 'POST',
+      headers: headers,
+      json: true,
+      form: { "TagIds": [ this._getTagId(message.tag) ], "Urls": [ message.imageUrl ] }
+    }
+
+    //リクエスト送信
+    this.request(options, (error, response, body) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      console.log(body);
+      if (endFunc) {
+        endFunc();
+      }
+    })
   }
 }
 

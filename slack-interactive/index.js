@@ -2,6 +2,7 @@ const KintaiMembers = require("../kintai-members");
 const SlackParser = require("../slack-parser");
 const TrainQueue = require("../train-queue");
 const azure = require('azure-storage');
+const request = require('request');
 
 // You must include a context, but other arguments are optional
 module.exports = (context, data) => {
@@ -12,7 +13,7 @@ module.exports = (context, data) => {
         const members = new KintaiMembers();
         const selected = members.search(payload.actions[0].selected_options[0].value);
         if (selected) {
-            const queue = new TrainQueue(azure, process.env.KINTAI_STORAGE_CONTAINER);
+            const queue = new TrainQueue(request, azure, process.env.KINTAI_STORAGE_CONTAINER);
             queue.setTagQueue(
                 payload.original_message.attachments[0].image_url,
                 selected.id,

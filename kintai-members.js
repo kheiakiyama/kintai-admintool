@@ -7,12 +7,12 @@ class KintaiMembers {
         id: "kheiakiyama"
       },
       {
-        name: "Unknown1",
-        id: "member1"
+        name: "Dummy",
+        id: "dummy"
       },
       {
-        name: "Unknown2",
-        id: "member2"
+        name: "Unknown",
+        id: null
       }
     ];
   }
