@@ -62,21 +62,16 @@ class TrainQueue {
   }
 
   _getTagsCustomVision(endFunc) {
-    //ヘッダーを定義
     const headers = {
       'Content-Type': 'application/json',
       'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
     }
-
-    //オプションを定義
     const options = {
       url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/tags',
       method: 'GET',
       headers: headers,
       json: true
     }
-
-    //リクエスト送信
     this.request(options, (error, response, body) => {
       if (error) {
         console.log(error);
@@ -100,13 +95,10 @@ class TrainQueue {
   }
 
   _trainCustomVision(message, endFunc) {
-    //ヘッダーを定義
     const headers = {
       'Content-Type': 'application/json',
       'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
     }
-
-    //オプションを定義
     const options = {
       url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
       method: 'POST',
@@ -114,8 +106,6 @@ class TrainQueue {
       json: true,
       form: { "TagIds": [ this._getTagId(message.tag) ], "Urls": [ message.imageUrl ] }
     }
-
-    //リクエスト送信
     this.request(options, (error, response, body) => {
       if (error) {
         console.log(error);
@@ -125,7 +115,31 @@ class TrainQueue {
       if (endFunc) {
         endFunc();
       }
-    })
+    });
+  }
+
+  predictionUrl(url, endFunc) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Prediction-key': process.env.CUSTOM_VISION_PREDICTION_KEY
+    }
+    const options = {
+      url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Prediction/' + process.env.CUSTOM_VISION_PROJECT_ID + '/url',
+      method: 'POST',
+      headers: headers,
+      json: true,
+      form: { "Url": url }
+    }
+    this.request(options, (error, response, body) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      console.log(body);
+      if (endFunc) {
+        endFunc();
+      }
+    });
   }
 }
 
