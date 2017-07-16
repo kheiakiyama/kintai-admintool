@@ -20,6 +20,9 @@ class TrainQueue {
       if (result.length > 0) {
         var object = result[0];
         Object.assign(object, { filename: object.messageId + '.jpg' });
+        if (objectFunc) {
+          objectFunc(object);
+        }
         var meta = {
           messageId: object.messageId,
           popReceipt: object.popReceipt
@@ -31,9 +34,6 @@ class TrainQueue {
           }
           console.log("setQueueMetadata");
           console.log(result);
-          if (objectFunc) {
-            objectFunc(object);
-          }
         });
       } else {
         if (notFoundFunc) {
