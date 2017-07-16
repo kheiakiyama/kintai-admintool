@@ -4,36 +4,63 @@ const MAX_IMAGE_PER_TAG = 20;
 
 class TrainQueue {
 
-  constructor(request, azure, container) {
+  constructor(request, azure) {
     this.request = request;
-    this.blobSvc = azure.createBlobService(process.env.KINTAI_STORAGE_CONNECTION);
     this.queueSvc = azure.createQueueService(process.env.KINTAI_STORAGE_CONNECTION);
-    this.container = container;
     this.tags = [];
   }
 
   //Queue の先頭にあるオブジェクトを削除せずに返します。
   peek(objectFunc, notFoundFunc) {
-    this.blobSvc.listBlobsSegmented(this.container, null, (error, result, response) => {
+    this.queueSvc.getMessages(process.env.KINTAI_QUEUE_NAME, { numofmessages: 1, peekonly: false }, (error, result, response) => {
       if (error) {
         console.log(error);
         return;
       }
-      if (result.entries.length > 0) {
-        objectFunc(result.entries[0]);
+      if (result.length > 0) {
+        var object = result[0];
+        Object.assign(object, { filename: object.messageId + '.jpg' });
+        var meta = {
+          messageId: object.messageId,
+          popReceipt: object.popReceipt
+        };
+        this.queueSvc.setQueueMetadata(process.env.KINTAI_QUEUE_NAME, meta, {}, (error, result, response) => {
+          if (error) {
+            console.log(error);
+            return;
+          }
+          console.log("setQueueMetadata");
+          console.log(result);
+          if (objectFunc) {
+            objectFunc(object);
+          }
+        });
       } else {
-        notFoundFunc();
+        if (notFoundFunc) {
+          notFoundFunc();
+        }
       }
     });
   }
 
-  remove(name) {
-    this.blobSvc.deleteBlob(this.container, name, (error, response) => {
+  _remove(messageId) {
+    this.queueSvc.getQueueMetadata(process.env.KINTAI_QUEUE_NAME, {}, (error, result, response) => {
       if (error) {
         console.log(error);
         return;
       }
-      console.log(response);
+      console.log(result);
+      if (result.metadata.messageId !== messageId) {
+        console.log("unmatch messageId");
+        return;
+      }
+      this.queueSvc.deleteMessage(process.env.KINTAI_QUEUE_NAME, messageId, result.metadata.popReceipt, (error, result, response) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log(result);
+      });
     });
   }
 
@@ -56,7 +83,7 @@ class TrainQueue {
       }
       this._trainCustomVision(message, () => {
         const parsed = url.parse(message.imageUrl);
-        this.remove(path.basename(parsed.pathname));
+        this._remove(path.basename(parsed.pathname, ".jpg"));
       });
     });
   }
