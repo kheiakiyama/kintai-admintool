@@ -89,17 +89,11 @@ class TrainQueue {
   }
 
   _getTagsCustomVision(endFunc) {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
-    }
-    const options = {
-      url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/tags',
-      method: 'GET',
-      headers: headers,
-      json: true
-    }
-    this.request(options, (error, response, body) => {
+    this._trainRequest(
+      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/tags',
+      'GET',
+      {},
+      (error, response, body) => {
       if (error) {
         console.log(error);
         return;
@@ -122,27 +116,21 @@ class TrainQueue {
   }
 
   _trainCustomVision(message, endFunc) {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
-    }
-    const options = {
-      url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
-      method: 'POST',
-      headers: headers,
-      json: true,
-      form: { "TagIds": [ this._getTagId(message.tag) ], "Urls": [ message.imageUrl ] }
-    }
-    this.request(options, (error, response, body) => {
-      if (error) {
-        console.log(error);
-        return;
+    this._trainRequest(
+      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
+      'POST',
+      { "TagIds": [ this._getTagId(message.tag) ], "Urls": [ message.imageUrl ] },
+      (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log(body);
+        if (endFunc) {
+          endFunc();
+        }
       }
-      console.log(body);
-      if (endFunc) {
-        endFunc();
-      }
-    });
+    );
   }
 
   predictionUrl(url, endFunc) {
@@ -169,6 +157,114 @@ class TrainQueue {
         endFunc(tag);
       }
     });
+  }
+
+  _trainRequest(url, method, form, requestFunc) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
+    }
+    const options = {
+      url: url,
+      method: method,
+      headers: headers,
+      json: true,
+      form: form
+    }
+    this.request(options, (error, response, body) => {
+      requestFunc(error, response, body);
+    });
+  }
+
+  train(endFunc) {
+    this._trainRequest(
+      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/train',
+      'POST',
+      {},
+      (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log(body);
+        if (body.Code) {
+          if (endFunc) {
+            endFunc(body);
+          }
+          return;
+        } else {
+          setTimeout(() => {
+            this._makeDefault(body, (body) => {
+              if (endFunc) {
+                endFunc(body);
+              }
+              this._getIterations((body) => {
+                body
+                  .filter((iteration) => { return iteration.Status === 'Completed' && !iteration.IsDefault; })
+                  .forEach((iteration) => {
+                    this._removeIteration(iteration);
+                  });
+              });
+            });
+          }, 10000)
+        }
+      }
+    );
+  }
+
+  _makeDefault(iteration, endFunc) {
+    iteration.IsDefault = true;
+    this._trainRequest(
+      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations/' + iteration.Id,
+      'PATCH',
+      iteration,
+      (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log(body);
+        if (endFunc) {
+          endFunc(body);
+        }
+      }
+    );
+  }
+
+  _getIterations(endFunc) {
+    this._trainRequest(
+      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations',
+      'GET',
+      {},
+      (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log(body);
+        if (endFunc) {
+          endFunc(body);
+        }
+      }
+    );
+  }
+
+  _removeIteration(iteration, endFunc) {
+    this._trainRequest(
+      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations/' + iteration.Id,
+      'DELETE',
+      {},
+      (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log('deleted ' + iteration.Id);
+        if (endFunc) {
+          endFunc('deleted ' + iteration.Id);
+        }
+      }
+    );
   }
 }
 
