@@ -81,7 +81,7 @@ class TrainQueue {
       if (this._isTagImageOver(message.tag)) {
         return;
       }
-      this._trainCustomVision(message, () => {
+      this._createImage(message, () => {
         const parsed = url.parse(message.imageUrl);
         this._remove(path.basename(parsed.pathname, ".jpg"));
       });
@@ -115,7 +115,7 @@ class TrainQueue {
     return tag ? tag.ImageCount >= MAX_IMAGE_PER_TAG : false;
   }
 
-  _trainCustomVision(message, endFunc) {
+  _createImage(message, endFunc) {
     this._trainRequest(
       'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
       'POST',
