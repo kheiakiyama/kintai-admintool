@@ -3,12 +3,16 @@ const path = require("path");
 const fs = require("fs");
 const querystring = require('querystring');
 const MAX_IMAGE_PER_TAG = 20;
+const AzureHelper = require('./azure-helper');
+const KintaiMembers = require('./kintai-members');
 
 class TrainQueue {
 
   constructor(request, azure) {
     this.request = request;
     this.queueSvc = azure.createQueueService(process.env.KINTAI_STORAGE_CONNECTION);
+    this.blobSvc = azure.createBlobService(process.env.KINTAI_STORAGE_CONNECTION);
+    this.helper = new AzureHelper(azure);
     this.tags = [];
   }
 
@@ -96,6 +100,43 @@ class TrainQueue {
         return;
       }
       this._createImageFromFile(message, fileName, () => {
+      });
+    });
+  }
+
+  callAddQuestion(IncomingWebhook, containerName, fullName) {
+    const fileName = path.basename(fullName);
+    this.blobSvc.createBlockBlobFromLocalFile(containerName, fileName, fullName, (error, result, response) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      const token = this.helper.generateSasToken(containerName, fileName, 'r');
+      const members = new KintaiMembers();
+      const url = process.env.SLACK_WEBHOOK_URL || '';
+      const webhook = new IncomingWebhook(url);
+      webhook.send({
+        "text": "Who is him/her?",
+        "response_type": "in_channel",
+        "attachments": [
+          {
+            "text": "Choose a name",
+            "fallback": "If you could read this message, you'd be choosing something fun to do right now.",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "callback_id": "member_selection",
+            "image_url": token.uri,
+            "thumb_url": token.uri,
+            "actions": [
+              {
+                "name": "members_list",
+                "text": "Pick a name...",
+                "type": "select",
+                "options": members.get_options()
+              }
+            ]
+          }
+        ]
       });
     });
   }
