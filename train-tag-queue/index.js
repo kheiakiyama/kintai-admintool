@@ -7,5 +7,5 @@ module.exports = (context) => {
     context.log('train-tag-queue called');
     context.log(context.bindings.myQueueItem);
     const queue = new TrainQueue(request, azure);
-    queue.setTag(context.bindings.myQueueItem);
+    queue.addImage(context.bindings.myQueueItem);
 };

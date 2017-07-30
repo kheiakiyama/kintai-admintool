@@ -1,5 +1,7 @@
 const url = require("url");
 const path = require("path");
+const fs = require("fs");
+const querystring = require('querystring');
 const MAX_IMAGE_PER_TAG = 20;
 
 class TrainQueue {
@@ -76,7 +78,7 @@ class TrainQueue {
     });
   }
 
-  setTag(message) {
+  addImage(message) {
     this._getTagsCustomVision(() => {
       if (this._isTagImageOver(message.tag)) {
         return;
@@ -88,11 +90,22 @@ class TrainQueue {
     });
   }
 
+  addImageFile(message, fileName) {
+    this._getTagsCustomVision(() => {
+      if (this._isTagImageOver(message.tag)) {
+        return;
+      }
+      this._createImageFromFile(message, fileName, () => {
+      });
+    });
+  }
+
   _getTagsCustomVision(endFunc) {
     this._trainRequest(
-      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/tags',
-      'GET',
-      {},
+      {
+        url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/tags',
+        method: 'GET'
+      },
       (error, response, body) => {
       if (error) {
         console.log(error);
@@ -117,9 +130,39 @@ class TrainQueue {
 
   _createImage(message, endFunc) {
     this._trainRequest(
-      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
-      'POST',
-      { "TagIds": [ this._getTagId(message.tag) ], "Urls": [ message.imageUrl ] },
+      {
+        url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/url',
+        method: 'POST',
+        form: { "TagIds": [ this._getTagId(message.tag) ], "Urls": [ message.imageUrl ] }
+      },
+      (error, response, body) => {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log(body);
+        if (endFunc) {
+          endFunc();
+        }
+      }
+    );
+  }
+
+  _createImageFromFile(message, fileName, endFunc) {
+    const url = 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/images/image?' +
+      querystring.stringify({ "TagIds": [ this._getTagId(message.tag) ] });
+    this._trainRequest(
+      {
+        url: url,
+        method: 'POST',
+        multipart: [
+          { body: fs.createReadStream(fileName) }
+        ],
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
+        }
+      },
       (error, response, body) => {
         if (error) {
           console.log(error);
@@ -159,28 +202,27 @@ class TrainQueue {
     });
   }
 
-  _trainRequest(url, method, form, requestFunc) {
+  _trainRequest(options, requestFunc) {
     const headers = {
       'Content-Type': 'application/json',
       'Training-key': process.env.CUSTOM_VISION_TRAINING_KEY
     }
-    const options = {
-      url: url,
-      method: method,
+    var reqOptions = {
       headers: headers,
-      json: true,
-      form: form
-    }
-    this.request(options, (error, response, body) => {
+      json: true
+    };
+    Object.assign(reqOptions, options);
+    return this.request(reqOptions, (error, response, body) => {
       requestFunc(error, response, body);
     });
   }
 
   train(endFunc) {
     this._trainRequest(
-      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/train',
-      'POST',
-      {},
+      {
+        url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/train',
+        method: 'POST'
+      },
       (error, response, body) => {
         if (error) {
           console.log(error);
@@ -215,9 +257,11 @@ class TrainQueue {
   _makeDefault(iteration, endFunc) {
     iteration.IsDefault = true;
     this._trainRequest(
-      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations/' + iteration.Id,
-      'PATCH',
-      iteration,
+      {
+        url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations/' + iteration.Id,
+        method: 'PATCH',
+        form: iteration
+      },
       (error, response, body) => {
         if (error) {
           console.log(error);
@@ -233,9 +277,10 @@ class TrainQueue {
 
   _getIterations(endFunc) {
     this._trainRequest(
-      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations',
-      'GET',
-      {},
+      {
+        url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations',
+        method: 'GET'
+      },
       (error, response, body) => {
         if (error) {
           console.log(error);
@@ -251,9 +296,10 @@ class TrainQueue {
 
   _removeIteration(iteration, endFunc) {
     this._trainRequest(
-      'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations/' + iteration.Id,
-      'DELETE',
-      {},
+      {
+        url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Training/projects/' + process.env.CUSTOM_VISION_PROJECT_ID + '/iterations/' + iteration.Id,
+        method: 'DELETE'
+      },
       (error, response, body) => {
         if (error) {
           console.log(error);
