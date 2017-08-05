@@ -10,9 +10,17 @@ module.exports = (context, data) => {
   context.log('slack-command called');
   if (data.body) {
     const subcommand = new SlackParser(data.body).parse().text;
-    if (subcommand === 'train') {
+    const queue = new TrainQueue(request, azure);
+    if (subcommand === 'status') {
+        queue.getAllTags((text) => {
+            context.res = {
+                "text": "Who is him/her?",
+                "response_type": "in_channel",
+            };
+            context.done();
+        })
+    } else if (subcommand === 'train') {
         const members = new KintaiMembers();
-        const queue = new TrainQueue(request, azure);
         queue.peek((object) => {
             const helper = new AzureHelper(azure);
             const token = helper.generateSasToken(process.env.KINTAI_STORAGE_CONTAINER, object.filename, 'r');

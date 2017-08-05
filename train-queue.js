@@ -141,6 +141,17 @@ class TrainQueue {
     });
   }
 
+  getAllTags(endFunc) {
+    this._getTagsCustomVision(() => {
+      const url = process.env.SLACK_WEBHOOK_URL || '';
+      var text = "";
+      this.tags.forEach((element) => { text += element.Name + ' ' + element.ImageCount + '\n'; });
+      if (endFunc) {
+        endFunc(text);
+      }
+    });
+  }
+
   _getTagsCustomVision(endFunc) {
     this._trainRequest(
       {
