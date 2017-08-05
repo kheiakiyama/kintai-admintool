@@ -14,7 +14,7 @@ module.exports = (context, data) => {
     if (subcommand === 'status') {
         queue.getAllTags((text) => {
             context.res = {
-                "text": "Who is him/her?",
+                "text": text,
                 "response_type": "in_channel",
             };
             context.done();
