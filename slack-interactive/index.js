@@ -10,13 +10,12 @@ module.exports = (context, data) => {
   if (data.body) {
     const payload = JSON.parse(new SlackParser(data.body).parse().payload);
     if (payload.callback_id === 'member_selection') {
-        const members = new KintaiMembers();
-        const selected = members.search(payload.actions[0].selected_options[0].value);
-        if (selected) {
+        const members = new KintaiMembers(azure);
+        members.search(payload.actions[0].selected_options[0].value, (selected) => {
             const queue = new TrainQueue(request, azure);
             queue.setTagQueue(
                 payload.original_message.attachments[0].image_url,
-                selected.id,
+                selected.name._,
                 () => {
                     var message = payload.original_message;
                     context.log(message);
@@ -26,7 +25,7 @@ module.exports = (context, data) => {
                     context.done();
                 }
             );
-        }
+        });
     } else {
         context.done();
     }

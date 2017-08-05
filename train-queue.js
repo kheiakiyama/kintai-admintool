@@ -9,6 +9,7 @@ const KintaiMembers = require('./kintai-members');
 class TrainQueue {
 
   constructor(request, azure) {
+    this.azure = azure;
     this.request = request;
     this.queueSvc = azure.createQueueService(process.env.KINTAI_STORAGE_CONNECTION);
     this.blobSvc = azure.createBlobService(process.env.KINTAI_STORAGE_CONNECTION);
@@ -112,31 +113,33 @@ class TrainQueue {
         return;
       }
       const token = this.helper.generateSasToken(containerName, fileName, 'r');
-      const members = new KintaiMembers();
-      const url = process.env.SLACK_WEBHOOK_URL || '';
-      const webhook = new IncomingWebhook(url);
-      webhook.send({
-        "text": "Who is him/her?",
-        "response_type": "in_channel",
-        "attachments": [
-          {
-            "text": "Choose a name",
-            "fallback": "If you could read this message, you'd be choosing something fun to do right now.",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "callback_id": "member_selection",
-            "image_url": token.uri,
-            "thumb_url": token.uri,
-            "actions": [
-              {
-                "name": "members_list",
-                "text": "Pick a name...",
-                "type": "select",
-                "options": members.get_options()
-              }
-            ]
-          }
-        ]
+      const members = new KintaiMembers(this.azure);
+      members.get_options((options) => {
+        const url = process.env.SLACK_WEBHOOK_URL || '';
+        const webhook = new IncomingWebhook(url);
+        webhook.send({
+          "text": "Who is him/her?",
+          "response_type": "in_channel",
+          "attachments": [
+            {
+              "text": "Choose a name",
+              "fallback": "If you could read this message, you'd be choosing something fun to do right now.",
+              "color": "#3AA3E3",
+              "attachment_type": "default",
+              "callback_id": "member_selection",
+              "image_url": token.uri,
+              "thumb_url": token.uri,
+              "actions": [
+                {
+                  "name": "members_list",
+                  "text": "Pick a name...",
+                  "type": "select",
+                  "options": options
+                }
+              ]
+            }
+          ]
+        });
       });
     });
   }
