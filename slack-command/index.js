@@ -34,7 +34,7 @@ module.exports = (context, data) => {
         members.add({ name: parsed.args[0], id: parsed.args[1]}, (response) => {
             context.log(response);
             context.res = {
-                "text": parsed.args[0] + "added.",
+                "text": parsed.args[0] + " added.",
                 "response_type": "in_channel",
             };
             context.done();
@@ -43,7 +43,7 @@ module.exports = (context, data) => {
         members.remove(parsed.args[0], (response) => {
             context.log(response);
             context.res = {
-                "text": parsed.args[0] + "removed.",
+                "text": parsed.args[0] + " removed.",
                 "response_type": "in_channel",
             };
             context.done();
