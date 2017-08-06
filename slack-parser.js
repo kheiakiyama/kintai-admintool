@@ -11,6 +11,14 @@ class SlackParser {
     return this._restoreImageUrl(querystring.parse(replace));
   }
 
+  parseCommand() {
+    const parsed = this.parse().text.split(" ");
+    return {
+      subcommand: parsed[0],
+      args: parsed.slice(1)
+    };
+  }
+
   _restoreImageUrl(query) {
     if (this.imageUrl) {
       const re = /"dmy":""/;

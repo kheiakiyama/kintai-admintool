@@ -9,10 +9,10 @@ const request = require('request');
 module.exports = (context, data) => {
   context.log('slack-command called');
   if (data.body) {
-    const subcommand = new SlackParser(data.body).parse().text;
+    const parsed = new SlackParser(data.body).parseCommand();
     const queue = new TrainQueue(request, azure);
     const members = new KintaiMembers(azure);
-    if (subcommand === 'status') {
+    if (parsed.subcommand === 'status') {
         queue.getAllTags((text) => {
             context.res = {
                 "text": text,
@@ -20,7 +20,7 @@ module.exports = (context, data) => {
             };
             context.done();
         })
-    } else if (subcommand === 'list') {
+    } else if (parsed.subcommand === 'list') {
         members.get_options((options) => {
             var text = "";
             options.forEach((element) => { text += element.text + ' ' + element.value + '\n'; });
@@ -30,7 +30,25 @@ module.exports = (context, data) => {
             };
             context.done();
         });
-    } else if (subcommand === 'train') {
+    } else if (parsed.subcommand === 'add') {
+        members.add({ name: parsed.args[0], id: parsed.args[1]}, (response) => {
+            context.log(response);
+            context.res = {
+                "text": parsed.args[0] + "added.",
+                "response_type": "in_channel",
+            };
+            context.done();
+        });
+    } else if (parsed.subcommand === 'remove' || parsed.subcommand === 'delete') {
+        members.remove(parsed.args[0], (response) => {
+            context.log(response);
+            context.res = {
+                "text": parsed.args[0] + "removed.",
+                "response_type": "in_channel",
+            };
+            context.done();
+        });
+    } else if (parsed.subcommand === 'train') {
         members.get_options((options) => {
             queue.peek((object) => {
                 const helper = new AzureHelper(azure);

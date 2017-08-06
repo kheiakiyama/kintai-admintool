@@ -65,15 +65,13 @@ class KintaiMembers {
     });
   }
 
-  remove(member, success) {
+  remove(id, success) {
     var entGen = this.azure.TableUtilities.entityGenerator;
-    var newMember = {
+    var member = {
       PartitionKey: entGen.String('employee'),
-      RowKey: entGen.String(Math.random().toString(36).slice(-8)),
-      name: entGen.String(member.name),
-      id: entGen.String(member.id)
+      RowKey: entGen.String(id)
     };
-    this.tableSvc.deleteEntity(this.tableName, newMember, (error, result, response) => {
+    this.tableSvc.deleteEntity(this.tableName, member, (error, result, response) => {
       if(!error && success){
         success(response);
       }
