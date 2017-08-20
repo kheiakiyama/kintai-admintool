@@ -15,7 +15,7 @@ module.exports = (context, data) => {
             payload.original_message.attachments[0].image_url,
             payload.actions[0].selected_options[0].value,
             () => {
-                const selectedText = payload.original_message.attachments[0].actions.options.find((item) => {
+                const selectedText = payload.original_message.attachments[0].actions[0].options.find((item) => {
                     return item.value === payload.actions[0].selected_options[0].value;
                 }).text;
                 var message = payload.original_message;
