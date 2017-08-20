@@ -85,12 +85,16 @@ class TrainQueue {
 
   addImage(message) {
     this._getTagsCustomVision(() => {
-      if (this._isTagImageOver(message.tag)) {
-        return;
-      }
-      this._createImage(message, () => {
-        const parsed = url.parse(message.imageUrl);
-        this._remove(path.basename(parsed.pathname, ".jpg"));
+      const members = new KintaiMembers(azure);
+      members.search(message.id, (selected) => {
+        message.tag = selected.name._;
+        if (this._isTagImageOver(message.tag)) {
+          return;
+        }
+        this._createImage(message, () => {
+          const parsed = url.parse(message.imageUrl);
+          this._remove(path.basename(parsed.pathname, ".jpg"));
+        });
       });
     });
   }

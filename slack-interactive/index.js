@@ -10,22 +10,19 @@ module.exports = (context, data) => {
   if (data.body) {
     const payload = JSON.parse(new SlackParser(data.body).parse().payload);
     if (payload.callback_id === 'member_selection') {
-        const members = new KintaiMembers(azure);
-        members.search(payload.actions[0].selected_options[0].value, (selected) => {
-            const queue = new TrainQueue(request, azure);
-            queue.setTagQueue(
-                payload.original_message.attachments[0].image_url,
-                selected.name._,
-                () => {
-                    var message = payload.original_message;
-                    context.log(message);
-                    message.attachments[0].text = selected.name + " choosed.";
-                    message.attachments[0].actions = '';
-                    context.res = message;
-                    context.done();
-                }
-            );
-        });
+        const queue = new TrainQueue(request, azure);
+        queue.setTagQueue(
+            payload.original_message.attachments[0].image_url,
+            payload.actions[0].selected_options[0].value,
+            () => {
+                var message = payload.original_message;
+                context.log(message);
+                message.attachments[0].text = payload.actions[0].selected_options[0].text + " choosed.";
+                message.attachments[0].actions = '';
+                context.res = message;
+                context.done();
+            }
+        );
     } else {
         context.done();
     }
