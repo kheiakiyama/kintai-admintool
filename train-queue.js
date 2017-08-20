@@ -71,10 +71,10 @@ class TrainQueue {
     });
   }
 
-  setTagQueue(imageUrl, tag, success) {
+  setTagQueue(imageUrl, id, success) {
     const message = new Buffer(JSON.stringify({
       imageUrl: imageUrl,
-      tag: tag
+      id: id
     })).toString('base64');
     this.queueSvc.createMessage('tag', message, (error, result, response) => {
       if(!error){
