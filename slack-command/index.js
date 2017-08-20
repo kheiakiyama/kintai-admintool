@@ -86,6 +86,10 @@ module.exports = (context, data) => {
             });
         });
     } else {
+        context.res = {
+            "text": "status\nlist\nadd (name) (id)\nremove (id)",
+            "response_type": "in_channel"
+        };
         context.done();
     }
   } else {
